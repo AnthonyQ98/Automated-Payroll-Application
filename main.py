@@ -51,6 +51,8 @@ pension_contributions = 0
 if pension_percent > 0:
     pension_contributions = (total_income / 100 * pension_percent) / MONTHS_PER_YEAR
     print(f"Pension Contributions: €{round(pension_contributions, DECIMAL_PLACES_ROUND)}")
+else:
+    pension_contributions = 0
 
 print(f"Tax Allowance (annually): €{EMPLOYEE_TAX_ALLOWANCE}")
 print(f"Tax Allowance (monthly): €{round(EMPLOYEE_TAX_ALLOWANCE / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)}")
@@ -77,8 +79,10 @@ elif total_income > LOWER_HIGH_TAX_THRESHOLD:
         print(f"USC Monthly: €{usc_monthly}")
         net_income = net_income - usc_monthly - pension_contributions
     print(f"Net Monthly Income: €{round(net_income, DECIMAL_PLACES_ROUND)}")
-    new_record_to_db(employee_name, employee_number, total_income, deductible_tax, net_income, usc_monthly, pension_contributions, EMPLOYEE_TAX_ALLOWANCE / 12)
 
+new_record_to_db(employee_name, employee_number, total_income, deductible_tax, pension_percent, round(net_income, 2), usc_monthly, round(pension_contributions, 2), self_employed_binary, round(EMPLOYEE_TAX_ALLOWANCE / 12, 2))
+
+fetch_records(employee_number)
 
 
 
