@@ -9,6 +9,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from tax_calculations import calculate_tax
+from pushToDB import new_record_to_db
+import datetime
 
 
 class Ui_MainWindow(object):
@@ -16,21 +19,33 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(881, 597)
         MainWindow.setAutoFillBackground(True)
+
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+
+
         self.main_submitBtn = QtWidgets.QPushButton(self.centralwidget)
         self.main_submitBtn.setGeometry(QtCore.QRect(280, 410, 261, 61))
+
+
         font = QtGui.QFont()
         font.setFamily("Tahoma")
         font.setPointSize(18)
         font.setBold(False)
         font.setWeight(50)
+
+
         self.main_submitBtn.setFont(font)
         self.main_submitBtn.setObjectName("main_submitBtn")
+
+
         self.main_grossIncomeBox = QtWidgets.QLineEdit(self.centralwidget)
         self.main_grossIncomeBox.setGeometry(QtCore.QRect(280, 210, 261, 41))
         self.main_grossIncomeBox.setText("")
         self.main_grossIncomeBox.setObjectName("main_grossIncomeBox")
+
+
         self.main_employeeNameBox = QtWidgets.QLineEdit(self.centralwidget)
         self.main_employeeNameBox.setGeometry(QtCore.QRect(280, 90, 261, 41))
         self.main_employeeNameBox.setText("")
@@ -39,42 +54,65 @@ class Ui_MainWindow(object):
         self.main_employeeNumBox.setGeometry(QtCore.QRect(280, 150, 261, 41))
         self.main_employeeNumBox.setText("")
         self.main_employeeNumBox.setObjectName("main_employeeNumBox")
+
+
         self.main_pensionPercentSelector = QtWidgets.QSpinBox(self.centralwidget)
         self.main_pensionPercentSelector.setGeometry(QtCore.QRect(280, 310, 71, 22))
         self.main_pensionPercentSelector.setMaximum(10)
         self.main_pensionPercentSelector.setObjectName("main_pensionPercentSelector")
+
+
         self.main_pensionContriLbl = QtWidgets.QLabel(self.centralwidget)
         self.main_pensionContriLbl.setGeometry(QtCore.QRect(80, 295, 191, 51))
+
+
+
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
+
+
         self.main_pensionContriLbl.setFont(font)
         self.main_pensionContriLbl.setObjectName("main_pensionContriLbl")
         self.main_grossIncomeLbl = QtWidgets.QLabel(self.centralwidget)
         self.main_grossIncomeLbl.setGeometry(QtCore.QRect(150, 220, 116, 19))
+
+
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
+
+
         self.main_grossIncomeLbl.setFont(font)
         self.main_grossIncomeLbl.setObjectName("main_grossIncomeLbl")
         self.main_employeeNumLbl = QtWidgets.QLabel(self.centralwidget)
         self.main_employeeNumLbl.setGeometry(QtCore.QRect(110, 145, 191, 51))
+
+
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
+
+
         self.main_employeeNumLbl.setFont(font)
         self.main_employeeNumLbl.setObjectName("main_employeeNumLbl")
         self.main_nameLbl = QtWidgets.QLabel(self.centralwidget)
         self.main_nameLbl.setGeometry(QtCore.QRect(130, 85, 191, 51))
+
+
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
+
+
         self.main_nameLbl.setFont(font)
         self.main_nameLbl.setObjectName("main_nameLbl")
+
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 881, 21))
@@ -105,6 +143,28 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.main_submitBtn.clicked.connect(self.update_the_database)
+
+    def update_the_database(self):
+        Date1 = '2012-04-24T12:58:52Z'
+        dt1 = datetime.datetime.strptime(Date1, '%Y-%m-%dT%H:%M:%SZ')
+        print(f"Current Date is: {dt1}")
+        if self.main_grossIncomeBox.text() != "" and self.main_pensionPercentSelector.text() != "" \
+                and self.main_employeeNameBox.text() != "" and self.main_employeeNumBox.text() != "":
+            total_income = int(self.main_grossIncomeBox.text())
+            employee_number = int(self.main_employeeNumBox.text())
+            employee_name = self.main_employeeNameBox.text()
+            pension_percent = int(self.main_pensionPercentSelector.text())
+            deductible_tax, net_income, usc_monthly, pension_contributions, EMPLOYEE_TAX_ALLOWANCE = calculate_tax(total_income, pension_percent, self_employed_binary="n")
+            # Adjust hard coded name and employee number.
+            new_record_to_db(employee_name, employee_number, total_income, deductible_tax, pension_percent,
+                             round(net_income, 2), usc_monthly, round(pension_contributions, 2), "n",
+                             round(EMPLOYEE_TAX_ALLOWANCE / 12, 2), dt1)
+            self.main_grossIncomeBox.setText("")
+            self.main_pensionPercentSelector.setValue(0)
+        else:
+            print("NEED TO FILL IN THE BOXES.")
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "AQ Payroll System"))
@@ -122,6 +182,7 @@ class Ui_MainWindow(object):
         self.actionSave.setText(_translate("MainWindow", "View "))
         self.actionCopy.setText(_translate("MainWindow", "Copy"))
         self.actionPaste.setText(_translate("MainWindow", "Paste"))
+
 
 
 if __name__ == "__main__":
