@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_EmployeePayrollWindow(object):
+
     def setupUi(self, EmployeePayrollWindow):
         EmployeePayrollWindow.setObjectName("EmployeePayrollWindow")
         EmployeePayrollWindow.resize(1009, 570)

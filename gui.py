@@ -46,10 +46,10 @@ class Ui_MainWindow(object):
         self.main_grossIncomeBox.setObjectName("main_grossIncomeBox")
 
 
-        self.main_employeeNameBox = QtWidgets.QLineEdit(self.centralwidget)
-        self.main_employeeNameBox.setGeometry(QtCore.QRect(280, 90, 261, 41))
-        self.main_employeeNameBox.setText("")
-        self.main_employeeNameBox.setObjectName("main_employeeNameBox")
+        # self.main_employeeNameBox = QtWidgets.QLineEdit(self.centralwidget)
+        # self.main_employeeNameBox.setGeometry(QtCore.QRect(280, 90, 261, 41))
+        # self.main_employeeNameBox.setText("")
+        # self.main_employeeNameBox.setObjectName("main_employeeNameBox")
         self.main_employeeNumBox = QtWidgets.QLineEdit(self.centralwidget)
         self.main_employeeNumBox.setGeometry(QtCore.QRect(280, 150, 261, 41))
         self.main_employeeNumBox.setText("")
@@ -150,14 +150,14 @@ class Ui_MainWindow(object):
         dt1 = datetime.datetime.strptime(Date1, '%Y-%m-%dT%H:%M:%SZ')
         print(f"Current Date is: {dt1}")
         if self.main_grossIncomeBox.text() != "" and self.main_pensionPercentSelector.text() != "" \
-                and self.main_employeeNameBox.text() != "" and self.main_employeeNumBox.text() != "":
+                 and self.main_employeeNumBox.text() != "":
             total_income = int(self.main_grossIncomeBox.text())
             employee_number = int(self.main_employeeNumBox.text())
-            employee_name = self.main_employeeNameBox.text()
+            #employee_name = self.main_employeeNameBox.text()
             pension_percent = int(self.main_pensionPercentSelector.text())
             deductible_tax, net_income, usc_monthly, pension_contributions, EMPLOYEE_TAX_ALLOWANCE = calculate_tax(total_income, pension_percent, self_employed_binary="n")
             # Adjust hard coded name and employee number.
-            new_record_to_db(employee_name, employee_number, total_income, deductible_tax, pension_percent,
+            new_record_to_db(employee_number, total_income, deductible_tax, pension_percent,
                              round(net_income, 2), usc_monthly, round(pension_contributions, 2), "n",
                              round(EMPLOYEE_TAX_ALLOWANCE / 12, 2), dt1)
             self.main_grossIncomeBox.setText("")
@@ -170,12 +170,12 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "AQ Payroll System"))
         self.main_submitBtn.setText(_translate("MainWindow", "SUBMIT"))
         self.main_grossIncomeBox.setPlaceholderText(_translate("MainWindow", "Gross Income"))
-        self.main_employeeNameBox.setPlaceholderText(_translate("MainWindow", "Employee Name"))
+        #self.main_employeeNameBox.setPlaceholderText(_translate("MainWindow", "Employee Name"))
         self.main_employeeNumBox.setPlaceholderText(_translate("MainWindow", "Employee Number"))
         self.main_pensionContriLbl.setText(_translate("MainWindow", "Pension Contributions:"))
         self.main_grossIncomeLbl.setText(_translate("MainWindow", "Gross Income:"))
         self.main_employeeNumLbl.setText(_translate("MainWindow", "Employee Number:"))
-        self.main_nameLbl.setText(_translate("MainWindow", "Employee Name:"))
+        #self.main_nameLbl.setText(_translate("MainWindow", "Employee Name:"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
         self.actionNew.setText(_translate("MainWindow", "New"))

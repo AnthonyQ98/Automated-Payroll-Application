@@ -15,49 +15,66 @@ class Payroll_Window(QtWidgets.QMainWindow, payroll_window):
         super(Payroll_Window, self).__init__(parent)
         self.setupUi(self)
 
+    def openWindow(self):
+        self.window = QtWidgets.QWidget()
+        self.ui = payroll_window()
+        self.ui.setupUi(self.window)
+        self.window.show()
+
 class LoginWindow(QtWidgets.QMainWindow, log_in_window):
     logged = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(LoginWindow, self).__init__(parent)
         self.setupUi(self)
-        self.btn_logIn.clicked.connect(self.authenticate)
+        self.btn_logIn.clicked.connect(self.openAllPayroll)
+       # self.btn_logIn.clicked.connect(self.openAllPayroll)
+
+        #if self.employeeNumInput.text() == "admin" and self.employeePinInput.text() == "admin":
+            #self.btn_logIn.clicked.connect(self.openAllPayroll)
+
+    def fetchResult(self, db_user, db_pass):
+        return LoginWindow.login(self, emp_number=db_user, pin_number=db_pass)
+
+    def openAllPayroll(self):
+        result = self.login(emp_number=self.employeeNumInput.text(), pin_number=self.employeePinInput.text())
+        print(result)
+        if result[0][0] == "admin" and result[0][1] == "admin":
+            #self.btn_logIn.clicked.connect(self.openAdminMenu)
+            self.openAdminMenu(result[0][0])
+        else:
+            print("THIS BLOCK")
+
+            payrollView = Payroll_Window(self)
+            payrollView.show()
+
+    def openAdminMenu(self, employeeNumInput):
+        employee_number = employeeNumInput
+        print(employee_number)
+        adminView = Main_Window(self)
+        adminView.show()
 
     @QtCore.pyqtSlot()
     def authenticate(self):
-        db_user = self.employeeNumInput.text()
-        db_pass = self.employeePinInput.text()
+        pass
+        #db_user = self.employeeNumInput.text()
+        #db_pass = self.employeePinInput.text()
 
-        result = LoginWindow.login(self, emp_number=db_user, pin_number=db_pass)
-        print(f"TESTING RESULT: {result}")
-        if result[0][0] == 'admin' and result[0][1] == 'admin':
-            print("Logged in as ADMIN.")
-            self.logged.emit()
-            self.close()
-        elif result == "None":
-            print("No results found!")
+        #result = LoginWindow.login(self, emp_number=db_user, pin_number=db_pass)
+        #print(f"TESTING RESULT: {result}")
+        #if result[0][0] == 'admin' and result[0][1] == 'admin':
+           # print("Logged in as ADMIN.")
+            #self.logged.emit()
+            #self.close()
+        #elif result == "None":
+            #print("No results found!")
 
-        else:
-            print("Logged in as EMPLOYEE.")
-        """
-                else:
-            result = LoginWindow.login(self, emp_number=db_user, pin_number=db_pass)
-            print("Result here", result)
-            if result == 1:
-                print(f"Logged in as EMPLOYEE!")
-                self.logged.emit()
-                self.close()
-            elif result == 2:
-                print(f"Logged in as ADMIN!")
-                self.logged.emit()
-                self.close()
-            else:
-                print("Invalid credentials.")
-                isClicked = "NO"
-            return result
-        """
+        #else:
+           # print("Logged in as EMPLOYEE.")
 
-        return result
+            #self.logged.emit()
+            #self.close()
+        #return result
 
 def main():
     import sys
@@ -65,10 +82,11 @@ def main():
     windowlogin = LoginWindow()
     w = Main_Window()
     pwind = Payroll_Window()
+    #windowlogin.logged.connect(w.show)
+    #windowlogin.logged.connect(pwind.show)
+    #windowlogin.logged.emit()
+    print("OPENED")
     windowlogin.show()
-    windowlogin.logged.connect(w.show)
-    print(f"TESTING DOWN HERE: ", windowlogin.result[0][0])
-    windowlogin.logged.connect(pwind.show)
 
     sys.exit(app.exec_())
 

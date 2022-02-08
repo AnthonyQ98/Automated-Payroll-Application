@@ -25,11 +25,11 @@ def connect_to_db():
         print(f"ERROR: ", e)
 
 
-def new_record_to_db(employee_name, employee_number, total_income, deductible_tax, pension_percent,
+def new_record_to_db(employee_number, total_income, deductible_tax, pension_percent,
                      net_income, usc_monthly, pension_contributions, self_employed_binary, EMPLOYEE_TAX_ALLOWANCE, currentDate):
     (crsr, connection) = connect_to_db()
     crsr = connection.cursor()
-    sql_command = f"""INSERT INTO Payslips (full_name, employee_number, gross_income, pension_percent, pension_contributions, self_employed, income_tax, usc, tax_allowance, net_income, date_created) VALUES ("{employee_name}", {employee_number}, {total_income}, {pension_percent}, {pension_contributions}, "{self_employed_binary}", {deductible_tax}, {usc_monthly}, {EMPLOYEE_TAX_ALLOWANCE}, {net_income}, "{currentDate}");"""
+    sql_command = f"""INSERT INTO Payslips (employee_number, gross_income, pension_percent, pension_contributions, self_employed, income_tax, usc, tax_allowance, net_income, date_created) VALUES ({employee_number}, {total_income}, {pension_percent}, {pension_contributions}, "{self_employed_binary}", {deductible_tax}, {usc_monthly}, {EMPLOYEE_TAX_ALLOWANCE}, {net_income}, "{currentDate}");"""
     crsr.execute(sql_command)
     connection.commit()
     print("DB STATUS: Successfully added new payment info in to the database!")
@@ -58,7 +58,7 @@ def check_user_log_in(employeeNumber, pinNumber):
     crsr.execute(f"""SELECT employee_number, pin FROM Employees WHERE employee_number = "{employeeNumber}" AND pin = "{pinNumber}";""")
     result = crsr.fetchall()
     for i in result:
-        print(f"EMPLOYEE NUMBER: {i[0]}\nEMPLOYEE PIN: {i[1]}")
+        print(i)
     print(f"DB STATUS: Matched records have been found! Signing in...")
     connection.close()
     print("DB STATUS: Closed the connection.")
