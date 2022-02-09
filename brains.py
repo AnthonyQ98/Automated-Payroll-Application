@@ -43,10 +43,11 @@ class LoginWindow(QtWidgets.QMainWindow, log_in_window):
             #self.btn_logIn.clicked.connect(self.openAdminMenu)
             self.openAdminMenu(result[0][0])
         else:
-            print("THIS BLOCK")
-
             payrollView = Payroll_Window(self)
+            payrollView.loaddata(result[0][0])
+            #column, row = payrollView.on_selection()
             payrollView.show()
+
 
     def openAdminMenu(self, employeeNumInput):
         employee_number = employeeNumInput

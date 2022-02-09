@@ -8,13 +8,15 @@ def calculate_tax(total_income, pension_percent, self_employed_binary):
     net_income = 0
     usc_monthly = 0
     # CONSTANTS
-    EMPLOYEE_TAX_ALLOWANCE = 1700
+    EMPLOYEE_TAX_ALLOWANCE = round(1700 / 12, 2)
     LOWER_TAX_BAND = .20
     HIGHER_TAX_BAND = .40
-    GROSS_MONTHLY_INCOME = int(total_income) / 12
+    GROSS_MONTHLY_INCOME = int(total_income)
+    GROSS_YEARLY_INCOME = GROSS_MONTHLY_INCOME * 12
+    print("Gross Yearly Income: ", GROSS_YEARLY_INCOME)
     HIGHEST_USC = 0.11
     LOWER_HIGH_TAX_THRESHOLD = 36800
-    MONTHS_PER_YEAR = 12
+    MONTHS_PER_YEAR = 1
     USC_CUTOFF = 13000
     DECIMAL_PLACES_ROUND = 2
 
@@ -22,16 +24,16 @@ def calculate_tax(total_income, pension_percent, self_employed_binary):
 
     def calculate_usc():
         usc_deductible = 0
-        if total_income >= 100000 and self_employed_binary == "y":
-            usc_deductible = ((total_income - 100000) * HIGHEST_USC) + ((100000 - 70044) * 0.08) + ((70044 - 21295) * 0.045) + ((21295 - 12012) * 0.02) + (12012 * 0.005)
-        elif total_income >= 70044.01:
-            usc_deductible = ((total_income - 70044) * 0.08) + ((70044 - 21295) * 0.045) + ((21295 - 12012) * 0.02) + (12012 * 0.005)
-        elif total_income >= 21295.01 and total_income < 70044:
-            usc_deductible = ((total_income - 21295) * 0.045) + ((21295 - 12012) * 0.02) + (12012 * 0.005)
-        elif total_income >= 12012.01 and total_income < 21295:
-            usc_deductible = ((total_income - 12012) * 0.02) + (12012 * 0.005)
+        if GROSS_YEARLY_INCOME >= 100000 and self_employed_binary == "y":
+            usc_deductible = ((GROSS_YEARLY_INCOME - 100000) * HIGHEST_USC) + ((100000 - 70044) * 0.08) + ((70044 - 21295) * 0.045) + ((21295 - 12012) * 0.02) + (12012 * 0.005)
+        elif GROSS_YEARLY_INCOME >= 70044.01:
+            usc_deductible = ((GROSS_YEARLY_INCOME - 70044) * 0.08) + ((70044 - 21295) * 0.045) + ((21295 - 12012) * 0.02) + (12012 * 0.005)
+        elif GROSS_YEARLY_INCOME >= 21295.01 and GROSS_YEARLY_INCOME < 70044:
+            usc_deductible = ((GROSS_YEARLY_INCOME - 21295) * 0.045) + ((21295 - 12012) * 0.02) + (12012 * 0.005)
+        elif GROSS_YEARLY_INCOME >= 12012.01 and GROSS_YEARLY_INCOME < 21295:
+            usc_deductible = ((GROSS_YEARLY_INCOME - 12012) * 0.02) + (12012 * 0.005)
         else:
-            usc_deductible = (total_income * 0.005)
+            usc_deductible = (GROSS_YEARLY_INCOME * 0.005)
         return usc_deductible
 
     # GROSS INCOME BEFORE ANY DEDUCTIONS:
@@ -46,32 +48,37 @@ def calculate_tax(total_income, pension_percent, self_employed_binary):
     else:
         pension_contributions = 0
 
-    print(f"Tax Allowance (annually): €{EMPLOYEE_TAX_ALLOWANCE}")
-    print(f"Tax Allowance (monthly): €{round(EMPLOYEE_TAX_ALLOWANCE / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)}")
+    print(f"Tax Allowance (monthly): €{EMPLOYEE_TAX_ALLOWANCE}")
+   # print(f"Tax Allowance (monthly): €{round(EMPLOYEE_TAX_ALLOWANCE / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)}")
 
     # LOWER TAX BAND CALCULATIONS:
-    if total_income <= LOWER_HIGH_TAX_THRESHOLD:
+    if total_income <= LOWER_HIGH_TAX_THRESHOLD and GROSS_YEARLY_INCOME > 17000:
+        print("Lower Tax Bracket.")
         deductible_tax = total_income * LOWER_TAX_BAND - EMPLOYEE_TAX_ALLOWANCE
         print(f"PAYE Tax (incl. allowance): €{round(deductible_tax / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)}")
         net_income = total_income - deductible_tax
-        net_income = net_income / MONTHS_PER_YEAR
-        usc_monthly = round(calculate_usc() / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)
+        usc_monthly = round(calculate_usc() / 12, DECIMAL_PLACES_ROUND)
         print(f"USC Monthly: €{usc_monthly}")
         net_income = net_income - usc_monthly - pension_contributions
         print(f"Net Monthly Income: €{round(net_income, DECIMAL_PLACES_ROUND)}")
 
     # HIGHER TAX BAND CALCULATIONS:
     elif total_income > LOWER_HIGH_TAX_THRESHOLD:
+        print("Higher Tax Bracket.")
         deductible_tax = ((total_income - LOWER_HIGH_TAX_THRESHOLD) * HIGHER_TAX_BAND) + (LOWER_HIGH_TAX_THRESHOLD * LOWER_TAX_BAND) - EMPLOYEE_TAX_ALLOWANCE
         print(f"PAYE Tax (incl. allowance): €{round(deductible_tax / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)}")
         net_income = total_income - deductible_tax
-        net_income = net_income / MONTHS_PER_YEAR
         if total_income > USC_CUTOFF:
-            usc_monthly = round(calculate_usc() / MONTHS_PER_YEAR, DECIMAL_PLACES_ROUND)
+            usc_monthly = round(calculate_usc() / 12, DECIMAL_PLACES_ROUND)
             print(f"USC Monthly: €{usc_monthly}")
             net_income = net_income - usc_monthly - pension_contributions
         print(f"Net Monthly Income: €{round(net_income, DECIMAL_PLACES_ROUND)}")
-    return deductible_tax, net_income, usc_monthly, pension_contributions, EMPLOYEE_TAX_ALLOWANCE
+
+    else:
+        deductible_tax = 0
+        net_income = GROSS_MONTHLY_INCOME
+        usc_monthly = 0
+    return round(deductible_tax, 2), round(net_income, 2), round(usc_monthly, 2), round(pension_contributions, 2), round(EMPLOYEE_TAX_ALLOWANCE, 2)
 
 """
 employee_name = input("\t\t\t\tEmployee Name: \n")

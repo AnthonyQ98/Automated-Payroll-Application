@@ -9,6 +9,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from pushToDB import fetch_user_last_three_payroll_from_db
+import datetime
+
 
 
 class Ui_EmployeePayrollWindow(object):
@@ -17,7 +20,7 @@ class Ui_EmployeePayrollWindow(object):
         EmployeePayrollWindow.setObjectName("EmployeePayrollWindow")
         EmployeePayrollWindow.resize(1009, 570)
         self.employeeNameLbl = QtWidgets.QLabel(EmployeePayrollWindow)
-        self.employeeNameLbl.setGeometry(QtCore.QRect(110, 90, 231, 31))
+        self.employeeNameLbl.setGeometry(QtCore.QRect(100, 90, 500, 31))
         font = QtGui.QFont()
         font.setPointSize(16)
         font.setBold(True)
@@ -28,7 +31,7 @@ class Ui_EmployeePayrollWindow(object):
         self.warningLoggedInMsg.setGeometry(QtCore.QRect(220, 370, 611, 41))
         self.warningLoggedInMsg.setObjectName("warningLoggedInMsg")
         self.employeeNumLbl = QtWidgets.QLabel(EmployeePayrollWindow)
-        self.employeeNumLbl.setGeometry(QtCore.QRect(510, 90, 231, 31))
+        self.employeeNumLbl.setGeometry(QtCore.QRect(600, 90, 300, 31))
         font = QtGui.QFont()
         font.setPointSize(16)
         font.setBold(True)
@@ -45,7 +48,7 @@ class Ui_EmployeePayrollWindow(object):
         self.dateLbl.setObjectName("dateLbl")
         self.displayPayrollTable = QtWidgets.QTableWidget(EmployeePayrollWindow)
         self.displayPayrollTable.setGeometry(QtCore.QRect(120, 180, 741, 181))
-        self.displayPayrollTable.setLineWidth(1)
+        self.displayPayrollTable.setLineWidth(3)
         self.displayPayrollTable.setRowCount(3)
         self.displayPayrollTable.setColumnCount(6)
         self.displayPayrollTable.setObjectName("displayPayrollTable")
@@ -82,6 +85,8 @@ class Ui_EmployeePayrollWindow(object):
         self.retranslateUi(EmployeePayrollWindow)
         QtCore.QMetaObject.connectSlotsByName(EmployeePayrollWindow)
 
+        self.displayPayrollTable.selectionModel().selectionChanged.connect(self.on_selection)
+
     def retranslateUi(self, EmployeePayrollWindow):
         _translate = QtCore.QCoreApplication.translate
         EmployeePayrollWindow.setWindowTitle(_translate("EmployeePayrollWindow", "View Payroll"))
@@ -101,6 +106,47 @@ class Ui_EmployeePayrollWindow(object):
         item.setText(_translate("EmployeePayrollWindow", "PDF"))
         item.setForeground(QtGui.QBrush(QtGui.QColor(0, 255, 0)))
         self.displayPayrollTable.setSortingEnabled(__sortingEnabled)
+        self.displayPayrollTable.setHorizontalHeaderLabels(["Date", "Payslip ID", "Monthly Gross", "PAYE + USC", "Net Income", "Download PDF"])
+
+    def on_selection(self, selected):
+        for ix in selected.indexes():
+            column = ix.column()
+            row = ix.row()
+            if column == 5:
+                print("Column", column, "was clicked. Getting the row.")
+                print("Row was", row)
+                print(self.displayPayrollTable.item(row, column).text())
+
+    def loaddata(self, employee_number):
+        date = datetime.date.today()
+        print("Load data function:", employee_number)
+        result = fetch_user_last_three_payroll_from_db(employee_number)
+        print(result)
+        #employee_number, employee_name, employee_dob, employee_role, employee_pin, employee_payslip_id, employee_number, gross_income, pension_percent, pension_contributions, self_employed_binary, paye, usc, allowance, net_income, date_created
+        self.employeeNameLbl.setText(f"Employee Name: {result[0][1]}")
+        self.employeeNumLbl.setText(f"Employee Number: {employee_number}")
+        self.dateLbl.setText(f"Date: {date}")
+        tablerow = 0
+        # populate each row of the view field.
+        for row in result:
+            total_tax_paid = row[13] + row[14]
+            #DATE COLUMN
+            self.displayPayrollTable.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(row[-1]))
+            #PAYSLIP ID COLUMN
+            self.displayPayrollTable.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(f"{round(row[6], 2)}"))
+            #GROSS PAY
+            self.displayPayrollTable.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(f"{round(row[8], 2)}"))
+            #PAYE + USC
+            self.displayPayrollTable.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(f"{round(total_tax_paid, 2)}"))
+            #NET INCOME
+            self.displayPayrollTable.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(f"{round(row[16], 2)}"))
+            #NEXT ROW
+            tablerow += 1
+        return result
+
+        def pdf_download():
+            print("TRIGGERED")
+
 
 
 if __name__ == "__main__":

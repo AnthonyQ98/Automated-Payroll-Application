@@ -1,0 +1,1 @@
+SELECT * FROM Employees LEFT JOIN Payslips ON Employees.employee_number = Payslips.employee_number WHERE Employees.employee_number = 111 ORDER BY Payslips.date_created DESC LIMIT 3
